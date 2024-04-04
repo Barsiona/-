@@ -1,0 +1,102 @@
+from time import perf_counter
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.animation import PillowWriter
+from mpl_toolkits.mplot3d import Axes3D
+
+
+def task_1():
+    print('Задание №1')
+    np_arr_1, np_arr_2 = np.random.randint(0, 100, 10 ** 6), np.random.randint(0, 100, 10 ** 6)
+    py_arr_1, py_arr_2 = np.ndarray.tolist(np_arr_1), np.ndarray.tolist(np_arr_2)
+
+    def np_performance():
+        t_start = perf_counter()  
+        np.multiply(np_arr_1, np_arr_2)  
+        return perf_counter() - t_start  
+
+    def py_performance():
+        t_start = perf_counter()  
+        [el_1 * el_2 for el_1 in py_arr_1 for el_2 in py_arr_2]  
+        return perf_counter() - t_start  
+
+    print('Считаем...', end='\r')
+    print(f'Время выполнения на numpy: {np_performance()}\nВремя выполнения на python: {py_performance()}')
+
+
+def task_2():
+    arr = np.genfromtxt('data2.csv', delimiter=',', skip_header=1, usecols=(2,))
+    arr2 = (arr - arr.min()) / (arr.max() - arr.min())
+    std = np.std(arr)
+
+    fig: plt.Figure = plt.figure(figsize=(10, 4))
+    ax_1: plt.Axes = fig.add_subplot(121)
+    ax_2: plt.Axes = fig.add_subplot(122)
+    fig.subplots_adjust(wspace=0.5)  
+
+    height = ax_1.hist(arr, bins=16)[0].max()
+
+    ax_2.hist(arr2, bins=16, density=True, color='green')  
+
+    ax_1.plot(np.repeat(std, height.max()), np.arange(height), color='red')
+
+    ax_1.annotate('среднеквадратичное отклонение', xy=(std - std / 20, 0),
+                  xytext=(std + std / 15, height.max() / 10)).set_rotation(90)
+
+
+    ax_1.set_title('Распределение Solids')
+    ax_1.set_xlabel('значение измерения')
+    ax_1.set_ylabel('интервалы измерений')
+
+    ax_2.set_title('Нормализованное распределение Solids')
+    ax_2.set_xlabel('значение измерения')
+    ax_2.set_ylabel('интервалы измерений')
+
+    plt.show()  
+
+
+def task_3():
+    xs = np.linspace(-np.pi, np.pi, 100)  
+    ys = 1 / xs  # по OY — гиперболу 1/x
+    zs = np.sin(xs)  # по OZ — синусоиду sin(x)
+
+   
+    fig: plt.Figure = plt.figure()
+    ax: Axes3D = Axes3D(fig)
+    ax.plot(xs, ys, zs, marker='.')
+    plt.show()  # отображаем график в gui
+
+
+def extra_task():
+    print('Создаю анимацию...', end='\r')
+    animation: PillowWriter = PillowWriter(60)
+    base = plt.subplots()
+    fig: plt.Figure = base[0]
+    ax: plt.Axes = base[1]
+    animation.setup(fig, 'extra.gif')
+
+    ax.set_title('Анимированный y = sin(x)')
+    ax.set_xlabel('x')
+    ax.set_ylabel('sin(x)')
+
+    xs = np.linspace(0, 2 * np.pi, 100)
+    ys = np.sin(xs)
+    ax.plot(xs, ys)
+    dot, = ax.plot([0], [0], 'ro')
+    animation.grab_frame()
+
+    slides = np.linspace(0, 2 * np.pi, 60)
+    for i in slides:
+        dot.set_data(i, np.sin(i))
+        animation.grab_frame()
+
+    animation.finish()
+    print('Создание анимации завершено — файл extra.gif готов!')
+
+
+if __name__ == '__main__':
+    task_1()
+    # task_2()
+    # task_3()
+    # extra_task()
