@@ -1,27 +1,25 @@
 <!DOCTYPE html>
-<html>
-   <head>
-      <title>Index Page</title>
-   </head>
-   <body>
-      <h3>Profiles</h3>
-      <a href="/add_data">ADD</a>
-      <br>
-      <table>
-         <thead>
-            <th>Id</th>
-            <th>STEPS</th>
-            <th>DATA</th>
-            <th>#</th>
-         </thead>
-         {% for data in profiles %}
-         <tbody>
-            <td>{{data.id}}</td>
-            <td>{{data.steps}}</td>
-            <td>{{data.datas}}</td>
-            <td><a href="/delete/{{data.id}}" type="button">Delete</a></td>
-         </tbody>
-         {% endfor%}
-      </table>
-   </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Steps Page</title>
+</head>
+<body bgcolor="B6EFD4">
+<h2 style="color:#5A2A27">Steps</h2>
+<form method="post" action="/add_step">
+    <b style="color:#2F4550">Steps: </b><input type="text" name="step"><br>
+    <b style="color:#2F4550">Date: </b><input type="date" name="date"><br>
+    <button type="submit">Add steps note</button>
+</form>
+
+<h3 style="color:#5A2A27">Steps history</h3>
+{% for step in stepsnote %}
+<div style="color:#2F4550">
+    <b>{{ step.steps }}</b><br>
+    <i>{{ step.date }}</i>
+</div>
+{% endfor %}
+<a href="/delete_all"><button>Clear</button></a>
+
+</body>
 </html>
