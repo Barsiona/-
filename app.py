@@ -1,58 +1,45 @@
-from flask import Flask, request, redirect
-from flask.templating import render_template
+import flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 
-app = Flask(__name__)
-app.debug = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app = flask.Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Books.db'
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 
-class Profile(db.Model):
+class StepsNote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    steps = db.Column(db.Integer, unique=False, nullable=False)
-    datas = db.Column(db.Integer, unique=False, nullable=False)
+    steps = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.String(10), nullable=False)
 
-    def __repr__(self):
-        return f"Steps : {self.steps}, Data: {self.datas}"
+    def __init__(self, steps, date):
+        self.steps = steps
+        self.date = date
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    profiles = Profile.query.all()
-    return render_template('index.html', profiles=profiles)
+    return flask.render_template('index.html', steps=list(reversed(StepsNote.query.all())))
 
 
-@app.route('/add_data')
-def add_data():
-    return render_template('add_profile.html')
-
-
-# function to add profiles
-@app.route('/add', methods=["POST"])
-def profile():
-    steps = request.form.get("steps")
-    datas = request.form.get("datas")
-
-    if steps and datas is not None:
-        p = Profile(steps=steps, data=datas)
-        db.session.add(p)
-        db.session.commit()
-        return redirect('/')
-    else:
-        return redirect('/')
-
-
-@app.route('/delete/<int:id>')
-def erase(id):
-    data = Profile.query.get(id)
-    db.session.delete(data)
+@app.route('/add_step', methods=['POST'])
+def add_book():
+    steps = flask.request.form['step']
+    date = flask.request.form['date']
+    db.session.add(StepsNote(steps, date))
     db.session.commit()
-    return redirect('/')
+
+    return flask.redirect(flask.url_for('index'))
 
 
-if __name__ == '__main__':
-    app.run()
+@app.route('/delete_all', methods=['GET'])
+def delete_all():
+    for step in StepsNote.query.all():
+        db.session.delete(step)
+    db.session.commit()
 
+    return flask.redirect(flask.url_for('index'))
+
+
+with app.app_context():
+    db.create_all()
+app.run()
